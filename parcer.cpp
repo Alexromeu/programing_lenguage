@@ -7,16 +7,14 @@
 #include <typeinfo>
 
 
+
 enum class TokenType {
-    // Data Types
+    // data types
     INTEGER,
     FLOAT,
     BOOLEAN,
-    CHAR,        
-    IDENTIFIER,
+    CHAR, 
     
-    VARNAME,
-
     // Operators
     PLUS,
     MINUS,
@@ -24,6 +22,8 @@ enum class TokenType {
     EQUALS,
     DIVIDE,
 
+    PRINT,
+    UNIDENTIFIED,
     // Structural / Invisible Tokens 
     END_OF_FILE  // Tells your parser when the text is completely finished
 };
@@ -52,19 +52,26 @@ struct Expression {
 
 
 const std::unordered_map<std::string, TokenType> stringToTypeMap = {
-    // Data Types / Keywords
-    {"int",     TokenType::INTEGER},
-    {"float",   TokenType::FLOAT},
-    {"bool",    TokenType::BOOLEAN},
-    {"char",    TokenType::CHAR},
-    {"_varname_", TokenType::VARNAME},
+    // Data Type Identifiers / Keywords
+    {"int",         TokenType::INTEGER},
+    {"float",       TokenType::FLOAT,},
+    {"bool",        TokenType::BOOLEAN},
+    {"char",        TokenType::CHAR},
+    
+    // Core Keywords / Special System Names
+    {"print",       TokenType::PRINT},
+    
 
     // Operators
-    {"+",       TokenType::PLUS},
-    {"-",       TokenType::MINUS},
-    {"*",       TokenType::STAR},
-    {"=",       TokenType::EQUALS},
-    {"/",       TokenType::DIVIDE}    
+    {"+",           TokenType::PLUS},
+    {"-",           TokenType::MINUS},
+    {"*",           TokenType::STAR},
+    {"/",           TokenType::DIVIDE},
+    {"=",          TokenType::EQUALS},
+
+    // Other
+    {"EOF",        TokenType::END_OF_FILE},
+    {"unidentified",   TokenType::UNIDENTIFIED},
 };
 
 
@@ -112,7 +119,6 @@ class Scanner {
         }
     }
 
-
 };
 
 class Lexer {
@@ -125,11 +131,16 @@ class Lexer {
             const std::string curr_tok = chunkList[i];
             auto it = stringToTypeMap.find(curr_tok);
             if (it != stringToTypeMap.end()) {
-                Token token = {};
-                token.kind = it->second;
-                token.value = it->first;
+                Token token1 = {};
+                token1.kind = it->second;
+                token1.value = it->first;
+                output.push_back(token1);
 
-                output.push_back(token);
+            } else {
+                Token token2 = {};
+                token2.kind = TokenType::UNIDENTIFIED; //later if a var is unidentify we need to search back a few to look to the type
+                token2.value = curr_tok;
+                output.push_back(token2);
             }  
         }
 
@@ -158,7 +169,7 @@ class AST {
 int main() {
     Scanner sc;
     Lexer lex;
-    std::string str = "int a + int b"; 
+    std::string str = "int a = 10 int b = 2 print a + b"; 
     std::vector<std::string> textList = sc.split_text(str);
 
     std::vector<Token> tokenS = lex.tokenize(textList);
@@ -166,3 +177,18 @@ int main() {
     //sc.printTokenList(textList);
     return 0;
 }
+
+//output:
+// 0 -> int
+// 10 -> a
+// 7 -> =
+// 10 -> 10
+// 0 -> int
+// 10 -> b
+// 7 -> =
+// 10 -> 2
+// 9 -> print
+// 10 -> a
+// 4 -> +
+// 10 -> b
+// notice each unident token has behind a type/equal... for now.....
