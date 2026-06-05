@@ -132,3 +132,5 @@ int main() {
 //      -if
 //      -while
 //      -for
+
+//next build tree with the structures created

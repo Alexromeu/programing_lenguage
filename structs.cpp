@@ -123,15 +123,15 @@ struct Parameter {
 };
 
 struct ParameterList {
-    std::vector<Parameter> parameters;
+    std::vector<Parameter*> parameters;
 };
 
 
 struct Function {
     struct Identifier name;       // The name used to call it
-    struct ParameterList params;  // The inputs (names and types)
+    struct ParameterList* params;  // The inputs (names and types)
+    struct Block* body;            // The actual block of code to execute
     struct VarType returnType;       // The output type (or void)
-    struct Block body;            // The actual block of code to execute
 };
 
 
@@ -157,7 +157,7 @@ typedef struct ASTNode {
         ExpressionBinary  binary_expr;
         NumberLiteral number;
         Identifier  identifier;
-        Block       block;
+        Block*       block;
     } as;              
 } ASTNode;
 
