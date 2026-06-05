@@ -1,80 +1,8 @@
 #include <cstddef>
-#include <string>
 #include <vector>
-#include <string>
 #include <string.h>
-#include <unordered_map>
-#include <typeinfo>
-
-
-
-enum class TokenType {
-    // data types
-    INTEGER,
-    FLOAT,
-    BOOLEAN,
-    CHAR, 
-    
-    // Operators
-    PLUS,
-    MINUS,
-    STAR,
-    EQUALS,
-    DIVIDE,
-
-    PRINT,
-    UNIDENTIFIED,
-    // Structural / Invisible Tokens 
-    END_OF_FILE  // Tells your parser when the text is completely finished
-};
-
-namespace TokenString {
-    std::string NEWLINE = "_newline_";
-}
-
-struct Token {
-    TokenType kind; //NUMBER, IDENT, etc.
-    std::string value; //"12", "x", "while", "if", etc.
-};
-
-struct Expression {
-    std::string atomic;
-    std::pair<std::string, std::vector<std::string>> operation;
-
-    // Expression exp
-    
-    // exp.operation({'-', {a, b}})
-    // a + b * c
-    // exp.operation({'+', 
-    //          exp.operation({ '*',
-    //                  {b, c} })})
-};
-
-
-const std::unordered_map<std::string, TokenType> stringToTypeMap = {
-    // Data Type Identifiers / Keywords
-    {"int",         TokenType::INTEGER},
-    {"float",       TokenType::FLOAT,},
-    {"bool",        TokenType::BOOLEAN},
-    {"char",        TokenType::CHAR},
-    
-    // Core Keywords / Special System Names
-    {"print",       TokenType::PRINT},
-    
-
-    // Operators
-    {"+",           TokenType::PLUS},
-    {"-",           TokenType::MINUS},
-    {"*",           TokenType::STAR},
-    {"/",           TokenType::DIVIDE},
-    {"=",          TokenType::EQUALS},
-
-    // Other
-    {"EOF",        TokenType::END_OF_FILE},
-    {"unidentified",   TokenType::UNIDENTIFIED},
-};
-
-
+#include <string>
+#include "structs.cpp"
 
 
 class Scanner {
@@ -95,7 +23,7 @@ class Scanner {
             size_t token_posInSource = str_in.find(extracted_text, current_search_offset);
             
             while (next_line_pos != std::string::npos && next_line_pos < token_posInSource) {
-                TextChunksList.push_back(TokenString::NEWLINE);
+                TextChunksList.push_back(TokenNewLine::NEWLINE);
                 next_line_pos = str_in.find("\n", next_line_pos + 1);
             }
             TextChunksList.push_back(extracted_text);
@@ -104,7 +32,7 @@ class Scanner {
         } 
 
         while (next_line_pos != std::string::npos) {
-            TextChunksList.push_back(TokenString::NEWLINE);
+            TextChunksList.push_back(TokenNewLine::NEWLINE);
         }
 
         return TextChunksList;
@@ -118,7 +46,6 @@ class Scanner {
             printf("tok-> %s\n", conv_str);
         }
     }
-
 };
 
 class Lexer {
@@ -155,15 +82,14 @@ class Lexer {
 };
 
 class Parser {
+    //identifies the Tokens and creates structures 
     public:
     Parser() {};
-    
 };
 
 class AST {
-    public:
+    public: 
 };
-
 
 
 int main() {
@@ -192,3 +118,17 @@ int main() {
 // 4 -> +
 // 10 -> b
 // notice each unident token has behind a type/equal... for now.....
+
+
+
+//1 - divide text in chunks by spaces
+//2 - tokenize them into Token struct
+//... i think now i should turn the tokens in expresions that can be 3 types
+//      -variable creation
+//      -variable assignation
+//      -function call
+
+//... i also turn them into control flow statments
+//      -if
+//      -while
+//      -for
