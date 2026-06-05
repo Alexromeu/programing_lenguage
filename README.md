@@ -31,15 +31,15 @@ interprets or transpiles.
 
 ## Current status
 
-- ✅ **Scanner** — splits raw source text into whitespace-separated chunks,
+-  **Scanner** — splits raw source text into whitespace-separated chunks,
   tracking newlines.
-- ✅ **Lexer** — turns chunks into `Token`s, looking each word up in a
+-  **Lexer** — turns chunks into `Token`s, looking each word up in a
   keyword/operator table (`stringToTypeMap`); unknown words become
   `UNIDENTIFIED`.
-- 🚧 **AST type structures** — node structs (`ASTNode`, `ExpressionBinary`,
+- **AST type structures** — node structs (`ASTNode`, `ExpressionBinary`,
   `ExpressionVarDecl`, `Block`, `Function`, …) are being defined.
-- ⬜ **Parser** — not yet implemented (recursive descent, operator precedence).
-- ⬜ **Interpreter / transpiler** back end.
+-  **Parser** — not yet implemented (recursive descent, operator precedence).
+-  **Interpreter / transpiler** back end.
 
 ## Files
 
