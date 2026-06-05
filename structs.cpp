@@ -150,7 +150,6 @@ struct NumberLiteral {
 };
 
 
-
 typedef struct ASTNode {
     TokenType type;     
     union {
