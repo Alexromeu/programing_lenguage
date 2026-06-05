@@ -4,10 +4,6 @@ A from-scratch toy programming language written in C++, built to learn how
 languages work from the inside — lexer → parser → AST → (eventually) interpreter
 and a C transpiler.
 
-> **Note on the folder name:** this repo lives in a directory called
-> `OpenGL_practice` for historical reasons (it started life as OpenGL
-> experiments — see [test.cpp](test.cpp)). The actual project is the language
-> implementation below.
 
 ## Goal
 
