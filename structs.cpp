@@ -88,15 +88,8 @@ struct Token {
 };
 //------
 
-struct Identifier {
-    char* name;   // just the variable name as a string
-};
 
 
-struct ExpressionVarDecl {
-    Identifier name;
-    struct ASTNode* value;  // points to whatever expression
-};
 
 struct ExpressionBinary {
     char op;           // '+', '-', '*', '/'
@@ -129,7 +122,7 @@ struct DataStructure {
     };
 };
 
-//-----Funcitons
+//-----Functions
 struct Parameter {
     VarType param;
 };
@@ -140,12 +133,6 @@ struct ParameterList {
 };
 
 
-struct Function {
-    struct Identifier name;       // The name used to call it
-    struct ParameterList* params;  // The inputs (names and types)
-    struct Block* body;            // The actual block of code to execute
-    struct VarType returnType;       // The output type (or void)
-};
 
 //-------
 
@@ -156,17 +143,6 @@ struct NumberLiteral {
     } ;
 };
 
-
-typedef struct ASTNode {
-    TokenType type;     
-    union {
-        ExpressionVarDecl       var_decl;
-        ExpressionBinary        binary_expr;
-        NumberLiteral           number;
-        Identifier              identifier;
-        Block*                  block;
-    } as;              
-} ASTNode;
 
 
 //after tokens are made we need to create the expressions at runtime with switch
