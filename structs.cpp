@@ -75,6 +75,8 @@ const std::unordered_map<std::string, TokenType> stringToTypeMap = {
     {"unidentified",   TokenType::UNIDENTIFIED},
 };
 
+
+//-----token types
 namespace TokenNewLine {
     std::string NEWLINE = "_nln_"; //new line
 };
@@ -84,15 +86,22 @@ struct Token {
     TokenType kind; //NUMBER, IDENT, etc.
     std::string value; //"12", "x", "while", "if", etc.
 };
-
+//------
 
 struct Identifier {
     char* name;   // just the variable name as a string
 };
 
+
 struct ExpressionVarDecl {
     Identifier name;
     struct ASTNode* value;  // points to whatever expression
+};
+
+struct ExpressionBinary {
+    char op;           // '+', '-', '*', '/'
+    struct ASTNode* left;
+    struct ASTNode* right;
 };
 
 
@@ -100,6 +109,7 @@ struct Block {
     struct ASTNode** statements;  // array of child nodes
     size_t count;
 };
+
 
 struct VarType {
     union {
@@ -110,6 +120,7 @@ struct VarType {
     };
 };
 
+
 struct DataStructure {
     union {
         std::vector<VarType> array;
@@ -118,9 +129,11 @@ struct DataStructure {
     };
 };
 
+//-----Funcitons
 struct Parameter {
     VarType param;
 };
+
 
 struct ParameterList {
     std::vector<Parameter*> parameters;
@@ -134,31 +147,27 @@ struct Function {
     struct VarType returnType;       // The output type (or void)
 };
 
-
-struct ExpressionBinary {
-    char op;           // '+', '-', '*', '/'
-    struct ASTNode* left;
-    struct ASTNode* right;
-};
-
+//-------
 
 struct NumberLiteral {
     union {
         int int_value;
         float float_value;
-    };
+    } ;
 };
 
 
 typedef struct ASTNode {
     TokenType type;     
     union {
-        ExpressionVarDecl     var_decl;
-        ExpressionBinary  binary_expr;
-        NumberLiteral number;
-        Identifier  identifier;
-        Block*       block;
+        ExpressionVarDecl       var_decl;
+        ExpressionBinary        binary_expr;
+        NumberLiteral           number;
+        Identifier              identifier;
+        Block*                  block;
     } as;              
 } ASTNode;
 
+
+//after tokens are made we need to create the expressions at runtime with switch
 
