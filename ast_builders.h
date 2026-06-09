@@ -67,3 +67,5 @@ inline ASTNode* make_variable_declaration(TokenType kind,
     node->as.variableDeclarator = decl;
     return node;
 }
+
+inline ASTNode make_binary_expression()

@@ -9,7 +9,6 @@
 
 
 class Parser {
-    //identifies the Tokens and creates structures 
     public:
     Parser() { 
         index_token = 0; 
@@ -26,20 +25,18 @@ class Parser {
             std::string value = token.value;
 
 
-            // int / float / bool / char all share the `type name = value`
-            // shape, so one branch handles them via the AST builder helpers.
             if (kind == TokenType::INTEGER || kind == TokenType::FLOAT ||
                 kind == TokenType::BOOLEAN || kind == TokenType::CHAR) {
-                Token name_tok  = advance();   // the variable name, e.g. "a"
-                advance();                     // EQUALS "=", discarded
-                Token value_tok = advance();   // the initial value, e.g. "10"
-
+                Token name_tok  = advance();  
+                advance();                     
+                Token value_tok = advance();  
+                    
                 out_node = make_variable_declaration(kind, name_tok, value_tok);
             }
 
-            // ==========================================
+
             // OPERATORS
-            // ==========================================
+            
             else if (kind == TokenType::PLUS) {
                 // Handled when token is '+'
             } 
@@ -56,9 +53,9 @@ class Parser {
                 // Handled when token is '='
             } 
 
-            // ==========================================
+           
             // INTERNAL / SYSTEM NAMES
-            // ==========================================
+        
             else if (kind == TokenType::PRINT) {
                 // Handled when token is 'printOut'
             } 
@@ -69,9 +66,9 @@ class Parser {
                 // Handled when token is a variable name, number literal, etc.
             } 
 
-            // ==========================================
+            
             // CONTROL FLOW
-            // ==========================================
+      
             else if (kind == TokenType::IF) {
                 // Handled when token is 'if'
             } 
@@ -84,10 +81,9 @@ class Parser {
             else if (kind == TokenType::FOR) {
                 // Handled when token is 'for'
             } 
-
-            // ==========================================
+  
             // SIGNS / BRACKETS
-            // ==========================================
+            
             else if (kind == TokenType::PARENTESIS_OPEN) {
                 // Handled when token is '('
             } 
@@ -101,9 +97,9 @@ class Parser {
                 // Handled when token is '}'
             } 
 
-            // ==========================================
+        
             // END OF FILE / FAILLBACK
-            // ==========================================
+            
             else if (kind == TokenType::END_OF_FILE) {
                 // Handled when you reach the end of the token stream
             } 
@@ -112,7 +108,7 @@ class Parser {
             }
         }
 
-        return nullptr; //CHANGE BEFORE COMPILING
+        return nullptr; 
     };
 
     private:
