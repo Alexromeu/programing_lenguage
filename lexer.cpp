@@ -41,6 +41,7 @@ enum class TokenType {
     ELSE,          // else
     WHILE,         // while
     FOR,           // for
+    RETURN,        // return
 
     // punctuation
     PARENTESIS_OPEN,   // (
@@ -69,6 +70,7 @@ const std::unordered_map<std::string, TokenType> stringToTypeMap = {
     {"else",     TokenType::ELSE},
     {"while",    TokenType::WHILE},
     {"for",      TokenType::FOR},
+    {"return",   TokenType::RETURN},
 };
 
 struct Token {
@@ -78,12 +80,7 @@ struct Token {
     int         column;  // 1-based, where the token starts
 };
 
-// ============================================================
-//  Lexer
-//  Walks the source ONE character at a time with a cursor.
-//  No whitespace-splitting: token boundaries come from character
-//  categories (digit / letter / operator), not from spaces.
-// ============================================================
+
 
 class Lexer {
 public:
@@ -245,6 +242,7 @@ private:
             case TokenType::ELSE:             return "ELSE";
             case TokenType::WHILE:            return "WHILE";
             case TokenType::FOR:              return "FOR";
+            case TokenType::RETURN:           return "RETURN";
             case TokenType::PARENTESIS_OPEN:  return "LPAREN";
             case TokenType::PARENTESIS_CLOSE: return "RPAREN";
             case TokenType::BRAKET_OPEN:      return "LBRACE";

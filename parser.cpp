@@ -6,8 +6,6 @@
 #include "lexer.cpp"
 #include "ast_builders.h"
 
-
-
 class Parser {
     public:
     Parser() { 
@@ -19,96 +17,15 @@ class Parser {
     ASTNode* parse_token(Token &token) {
         ASTNode *out_node = nullptr;
 
+        // Every statement type is dispatched in parse_statement; brackets and
+        // parentheses are consumed inside the helpers (parse_block/_function/
+        // _call), so they never lead a statement here.
         while (peek().kind != TokenType::END_OF_FILE) {
-            Token token = advance();
-            TokenType kind = token.kind;
-            std::string value = token.value;
-
-
-            if (kind == TokenType::INTEGER || kind == TokenType::FLOAT ||
-                kind == TokenType::BOOLEAN || kind == TokenType::CHAR) {
-                Token name_tok  = advance();  
-                advance();                     
-                Token value_tok = advance();  
-                    
-                out_node = make_variable_declaration(kind, name_tok, value_tok);
-            }
-
-
-            // OPERATORS
-            
-            else if (kind == TokenType::PLUS) {
-                // Handled when token is '+'
-            } 
-            else if (kind == TokenType::MINUS) {
-                // Handled when token is '-'
-            } 
-            else if (kind == TokenType::STAR) {
-                // Handled when token is '*'
-            } 
-            else if (kind == TokenType::DIVIDE) {
-                // Handled when token is '/'
-            } 
-            else if (kind == TokenType::EQUALS) {
-                // Handled when token is '='
-            } 
-
-           
-            // INTERNAL / SYSTEM NAMES
-        
-            else if (kind == TokenType::PRINT) {
-                // Handled when token is 'printOut'
-            } 
-            else if (kind == TokenType::FUNCTION) {
-                // Handled when token is 'function'
-            } 
-            else if (kind == TokenType::UNIDENTIFIED) {
-                // Handled when token is a variable name, number literal, etc.
-            } 
-
-            
-            // CONTROL FLOW
-      
-            else if (kind == TokenType::IF) {
-                // Handled when token is 'if'
-            } 
-            else if (kind == TokenType::ELSE) {
-                // Handled when token is 'else'
-            } 
-            else if (kind == TokenType::WHILE) {
-                // Handled when token is 'while'
-            } 
-            else if (kind == TokenType::FOR) {
-                // Handled when token is 'for'
-            } 
-  
-            // SIGNS / BRACKETS
-            
-            else if (kind == TokenType::PARENTESIS_OPEN) {
-                // Handled when token is '('
-            } 
-            else if (kind == TokenType::PARENTESIS_CLOSE) {
-                // Handled when token is ')'
-            } 
-            else if (kind == TokenType::BRAKET_OPEN) {
-                // Handled when token is '{'
-            } 
-            else if (kind == TokenType::BRAKET_CLOSE) {
-                // Handled when token is '}'
-            } 
-
-        
-            // END OF FILE / FAILLBACK
-            
-            else if (kind == TokenType::END_OF_FILE) {
-                // Handled when you reach the end of the token stream
-            } 
-            else {
-                // Fallback: This code should theoretically never be reached
-            }
+            ASTNode* stmt = parse_statement();
+            if (stmt) out_node = stmt;   // TODO: collect into a Program body
         }
 
-        return nullptr; 
+        return out_node;
     };
 
     private:
@@ -117,8 +34,132 @@ class Parser {
     size_t start;
     size_t end;
 
-    size_t get_position() {
 
+    bool is_operator(TokenType kind) {
+        return kind == TokenType::PLUS  || kind == TokenType::MINUS ||
+               kind == TokenType::STAR  || kind == TokenType::DIVIDE;
+    }
+
+    // Parse a single statement and return it as an ASTNode, or nullptr if the
+    // leading token doesn't start a statement we understand yet.
+    ASTNode* parse_statement() {
+        Token     token = advance();
+        TokenType kind  = token.kind;
+
+        if (kind == TokenType::INTEGER || kind == TokenType::FLOAT ||
+            kind == TokenType::BOOLEAN || kind == TokenType::CHAR) {
+            Token name_tok  = advance();   // variable name
+            advance();                     // '='
+            Token value_tok = advance();   // value
+            return make_variable_declaration(kind, name_tok, value_tok);
+        }
+        if (kind == TokenType::PRINT) {
+            return parse_expression();
+        }
+        if (kind == TokenType::FUNCTION) {
+            return parse_function(token);  // nested function declaration
+        }
+        if (kind == TokenType::RETURN) {
+            ASTNode* argument = parse_expression();
+            return make_ReturnStatement(argument, token);
+        }
+        if (kind == TokenType::UNIDENTIFIED) {
+            // `foo(a)` is a call; a bare name is part of an expression.
+            if (peek().kind == TokenType::PARENTESIS_OPEN) {
+                return parse_call(token);
+            }
+            index_token--;                 // put it back; let the expression parser read it
+            return parse_expression();
+        }
+        if (kind == TokenType::NUMBER) {
+            index_token--;                 // put it back; let the expression parser read it
+            return parse_expression();
+        }
+        return nullptr;
+    }
+
+    // Parse `function name ( params ) { body }`. Assumes the `function`
+    // keyword has already been consumed and is passed in as func_tok.
+    ASTNode* parse_function(Token func_tok) {
+        Token id_tok = advance();          // function name
+        advance();                         // consume '('
+
+        // Collect parameters until ')'. Commas are just separators.
+        std::vector<Identifier*> params;
+        while (peek().kind != TokenType::PARENTESIS_CLOSE &&
+               peek().kind != TokenType::END_OF_FILE) {
+            Token param_tok = advance();
+            if (param_tok.kind == TokenType::COMMA) continue;
+            params.push_back(make_identifier(param_tok));
+        }
+        advance();                         // consume ')'
+
+        Identifier*     id   = make_identifier(id_tok);
+        BlockStatement* body = parse_block();   // parses '{ ... }'
+
+        return make_FunctionDeclaration(params, /*generator*/ false,
+                                        /*expression*/ false,
+                                        id, body, &func_tok);
+    }
+
+    // Parse a call `name ( args )`. Assumes the callee name has already been
+    // consumed and is passed in as callee_tok; peek() is the '('.
+    ASTNode* parse_call(Token callee_tok) {
+        ASTNode* callee = make_identifier_node(callee_tok);
+        advance();                         // consume '('
+
+        std::vector<ASTNode*> arguments;
+        while (peek().kind != TokenType::PARENTESIS_CLOSE &&
+               peek().kind != TokenType::END_OF_FILE) {
+            if (peek().kind == TokenType::COMMA) { advance(); continue; }
+            arguments.push_back(parse_expression());
+        }
+        Token close_tok = advance();       // consume ')'
+
+        return make_CallExpression(callee, arguments, close_tok);
+    }
+
+    // Parse '{ ... }': consume the braces and every statement in between.
+    BlockStatement* parse_block() {
+        Token open_tok = advance();        // consume '{'
+
+        std::vector<ASTNode*> body;
+        while (peek().kind != TokenType::BRAKET_CLOSE &&
+               peek().kind != TokenType::END_OF_FILE) {
+            ASTNode* stmt = parse_statement();
+            if (stmt) body.push_back(stmt);
+        }
+
+        Token close_tok = advance();       // consume '}'
+        return make_blockStatement(body, open_tok, close_tok);
+    }
+
+    // One "atom": a literal (10, 3.14) or a name (a, b).
+    ASTNode* parse_primary() {
+        Token tok = advance();
+
+        if (tok.kind == TokenType::INTEGER || tok.kind == TokenType::FLOAT ||
+            tok.kind == TokenType::BOOLEAN || tok.kind == TokenType::CHAR) {
+            return make_literal_node(tok, tok.kind);
+        }
+        if (tok.kind == TokenType::UNIDENTIFIED) {
+            return make_identifier_node(tok);
+        }
+        return nullptr; // unexpected token
+    }
+
+    // Flat, left-to-right: a + b + c -> ((a + b) + c).
+    // No recursion needed yet; add precedence here when you support a + b * c.
+    ASTNode* parse_expression() {
+        ASTNode* left = parse_primary();
+
+        while (is_operator(peek().kind)) {
+            Token    op_tok = advance();
+            Operator op     = token_to_operator(op_tok);
+            ASTNode* right  = parse_primary();
+            left = make_binary_node(left, op, right);
+        }
+        return left;
     }
 
     Token peek() {
@@ -139,7 +180,7 @@ class AST {
 
 int main() {
 
-    std::string str = "int a = 10 int b = 2 print a + b"; 
+    std::string str = "int a = 10 int b = 2 print a + b\n function ale(b) {b*2} "; 
     Lexer lex(str);
 
     std::vector<Token> tokenS = lex.tokenize();

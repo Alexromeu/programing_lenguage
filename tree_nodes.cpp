@@ -8,6 +8,7 @@ struct ASTNode;
 struct Identifier;
 struct Literal;
 struct BlockStatement;
+struct CallExpression;
 
 enum class Operator {
     Add, Sub, Mul, Div, Assign, Equal, NotEqual, LessThan, Unknown
@@ -33,7 +34,6 @@ typedef struct FunctionDeclaration {
     Identifier* id;
     bool expression;
     bool generator;
-    bool async;
     std::vector<Identifier*> params;  
 
     BlockStatement* body;
@@ -113,6 +113,16 @@ typedef struct BinaryExpression {
     ASTNode* right;
 } BinaryExpression;
 
+typedef struct CallExpression {
+    const char* type;
+    size_t start;
+    size_t end;
+
+    ASTNode* callee;                  // the Identifier being called, e.g. foo2
+    std::vector<ASTNode*> arguments;  // argument expressions
+    bool optional;
+} CallExpression;
+
 typedef struct IfStatement {
     const char* type;
     size_t start;
@@ -158,6 +168,8 @@ typedef struct ASTNode {
         AssignmentExpression* assignmentExpression;
         ExpressionStatement* expressionStatement;
         BlockStatement* blockStatement;
+        CallExpression* callExpression;
+        ReturnStatement* returnStatement;
 
     } as;
 } ASTNode;
