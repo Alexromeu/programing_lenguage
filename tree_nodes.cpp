@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <cstdlib>
 #include <vector>
 #include <unordered_map>
@@ -151,6 +152,17 @@ typedef struct Identifier {
        
 } Identifier;
 
+typedef struct ForStatement {
+    const char* type;
+    size_t start;
+    size_t end;
+
+    ASTNode* init;
+    ASTNode* test;
+    BlockStatement* body;
+
+} ForStatement;
+
 typedef struct ASTNode {
     const char* type;
     size_t start;
@@ -170,6 +182,5 @@ typedef struct ASTNode {
         BlockStatement* blockStatement;
         CallExpression* callExpression;
         ReturnStatement* returnStatement;
-
     } as;
 } ASTNode;

@@ -174,7 +174,7 @@ inline ASTNode* make_ReturnStatement(ASTNode* argument, const Token& return_tok)
 
 // Wrap an already-parsed list of statements between '{' and '}' in a block.
 // The parser does the actual statement parsing; this just stamps the node.
-inline BlockStatement* make_blockStatement(const std::vector<ASTNode*>& body,
+inline ASTNode* make_blockStatement(const std::vector<ASTNode*>& body,
                                            const Token& open_tok,
                                            const Token& close_tok) {
     BlockStatement* block = new BlockStatement();
@@ -182,10 +182,16 @@ inline BlockStatement* make_blockStatement(const std::vector<ASTNode*>& body,
     block->start = open_tok.column;
     block->end   = close_tok.column + close_tok.value.size();
     block->body  = body;
-    return block;
+
+    ASTNode* node = new ASTNode();
+    node->type  = "BlockStatement";
+    node->start = block->start;
+    node->end   = block->end;
+    node->as.blockStatement = block;
+    return node;
 }
 
-inline IfStatement* make_ifStatement(const Token& if_tok, BinaryExpression* test, BlockStatement* consequent, BlockStatement* alternate = nullptr) {
+inline ASTNode* make_ifStatement(const Token& if_tok, BinaryExpression* test, BlockStatement* consequent, BlockStatement* alternate = nullptr) {
     IfStatement* ifstmt = new IfStatement();
     ifstmt->type = "IfStatement";
     ifstmt->test = test;
@@ -195,5 +201,15 @@ inline IfStatement* make_ifStatement(const Token& if_tok, BinaryExpression* test
     ifstmt->start = if_tok.column;
     ifstmt->end   = alternate ? alternate->end : consequent->end;
 
-    return ifstmt;
+    ASTNode* node = new ASTNode();
+    node->type  = "IfStatement";
+    node->start = ifstmt->start;
+    node->end   = ifstmt->end;
+    node->as.ifStatement = ifstmt;
+    return node;
 }
+
+inline ASTNode* make_ForStatement() {
+    
+}
+

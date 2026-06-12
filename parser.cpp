@@ -131,7 +131,9 @@ class Parser {
         }
 
         Token close_tok = advance();       // consume '}'
-        return make_blockStatement(body, open_tok, close_tok);
+        // make_blockStatement now wraps the block in an ASTNode; callers here
+        // want the BlockStatement* directly, so unwrap the union arm.
+        return make_blockStatement(body, open_tok, close_tok)->as.blockStatement;
     }
 
     // One "atom": a literal (10, 3.14) or a name (a, b).
