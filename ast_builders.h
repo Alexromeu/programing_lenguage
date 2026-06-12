@@ -43,9 +43,7 @@ inline int decode_literal_value(TokenType kind, const std::string& raw) {
     }
 }
 
-inline ASTNode* make_variable_declaration(TokenType kind,
-                                          const Token& name_tok,
-                                          const Token& value_tok) {
+inline ASTNode* make_variable_declaration(TokenType kind,const Token& name_tok, const Token& value_tok) {         
     Identifier* id  = make_identifier(name_tok);
     Literal*    lit = make_literal(value_tok, decode_literal_value(kind, value_tok.value));
 
@@ -185,4 +183,17 @@ inline BlockStatement* make_blockStatement(const std::vector<ASTNode*>& body,
     block->end   = close_tok.column + close_tok.value.size();
     block->body  = body;
     return block;
+}
+
+inline IfStatement* make_ifStatement(const Token& if_tok, BinaryExpression* test, BlockStatement* consequent, BlockStatement* alternate = nullptr) {
+    IfStatement* ifstmt = new IfStatement();
+    ifstmt->type = "IfStatement";
+    ifstmt->test = test;
+    ifstmt->consequent = consequent;
+    ifstmt->alternate = alternate;
+
+    ifstmt->start = if_tok.column;
+    ifstmt->end   = alternate ? alternate->end : consequent->end;
+
+    return ifstmt;
 }

@@ -34,6 +34,11 @@ enum class TokenType {
     GREATER,       // >
     GREATER_EQ,    // >=
 
+    // logical operators
+    AND_AND,       // &&
+    OR_OR,         // ||
+    BANG,          // !
+
     // keywords
     PRINT,         // printOut
     FUNCTION,      // function
@@ -154,7 +159,17 @@ public:
                     break;
                 case '!':
                     if (match('=')) output.push_back(make(TokenType::BANG_EQ, "!="));
-                    else            output.push_back(make(TokenType::UNKNOWN, "!")); // lone ! not supported yet
+                    else            output.push_back(make(TokenType::BANG,    "!")); // logical NOT
+                    break;
+
+                // logical AND / OR: only the doubled forms are valid
+                case '&':
+                    if (match('&')) output.push_back(make(TokenType::AND_AND, "&&"));
+                    else            output.push_back(make(TokenType::UNKNOWN, "&")); // lone & not supported
+                    break;
+                case '|':
+                    if (match('|')) output.push_back(make(TokenType::OR_OR, "||"));
+                    else            output.push_back(make(TokenType::UNKNOWN, "|")); // lone | not supported
                     break;
                 case '<':
                     if (match('=')) output.push_back(make(TokenType::LESS_EQ, "<="));
@@ -236,6 +251,9 @@ private:
             case TokenType::LESS_EQ:          return "LESS_EQ";
             case TokenType::GREATER:          return "GREATER";
             case TokenType::GREATER_EQ:       return "GREATER_EQ";
+            case TokenType::AND_AND:          return "AND_AND";
+            case TokenType::OR_OR:            return "OR_OR";
+            case TokenType::BANG:             return "BANG";
             case TokenType::PRINT:            return "PRINT";
             case TokenType::FUNCTION:         return "FUNCTION";
             case TokenType::IF:               return "IF";
